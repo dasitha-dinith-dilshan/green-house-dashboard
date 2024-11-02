@@ -1,0 +1,318 @@
+/* General styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-image: url('greenhouse-background.jpg');
+    background-size: cover;
+    color: white;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+}
+
+.title {
+    display: flex;
+    vertical-align: top;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: max-content;
+    /* padding: 20px; */
+    background-color: rgba(15, 218, 83, 0.836);
+    position:fixed;
+}
+
+h1 {
+    font-size: 36px;
+    margin: 0;
+    padding-left: 20px;
+}
+
+/* Profile and Logout Buttons */
+#profile-button, #logout-button {
+    background-color: #ffffff;
+    border: none;
+    color: rgb(16, 190, 16);
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin:10px;
+    transition: background-color 0.3s;
+}
+
+#profile-button:hover, #logout-button:hover {
+    background-color: rgb(0, 128, 0);
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.p-l-buttons{
+    display:flex;
+    margin-right: 10px;
+}
+
+
+.dash-bg {
+    background-color: rgba(0, 0, 0, 0.87);
+    border-radius: 15px;
+    padding: 20px;
+    width: 100%;
+    margin: 20px;
+}
+
+.css-selector {
+    background: linear-gradient(300deg, #043606f3, #aad7daec);
+    background-size: 200% 200%;
+    border-radius: 20px;
+
+    -webkit-animation: AnimationName 5s ease infinite;
+    -moz-animation: AnimationName 5s ease infinite;
+    animation: AnimationName 5s ease infinite;
+}
+
+@-webkit-keyframes AnimationName {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+@-moz-keyframes AnimationName {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+@keyframes AnimationName {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+
+#date, #greeting {
+    font-size: 20px;
+    margin: 10px 0;
+}
+
+/* Circular Indicators */
+.data-container {
+    display:inline-flex;
+    grid-template-columns: repeat(3, 2fr);
+    gap: 30px;
+    margin-top: 20px;
+    
+}
+
+.data {
+    width: 100px;
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    position:relative;
+    transition: transform 0.3s;
+}
+
+.circle {
+    transform: rotate(-90deg);
+    width: 100px;
+    height: 100px;
+}
+
+.circle-bg {
+    fill: none;
+    stroke-width: 4;
+    stroke: #ddd;
+
+}
+
+.circle-fill {
+    fill: none;
+    stroke: var(--color);
+    stroke-width:4;
+    stroke-linecap: round;
+    stroke-dasharray: 0 100;
+    transition: stroke-dasharray 0.5s;
+}
+
+.value {
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+    font-weight: bold;
+
+}
+
+.label {
+    margin-top: 10px;
+    font-size: 18px;
+    
+    
+}
+
+.data:hover {
+    transform: scale(1.1);
+    transition: transform 0.3s;
+}
+
+/* Greeting */
+.greeting {
+    color: bisque;
+    font-family: 'Platypi';
+    margin-bottom: 20px;
+}
+
+/* Footer */
+footer {
+    position: fixed;
+    bottom: 10px;
+    text-align: center;
+    vertical-align: middle;
+    width: 100%;
+    height: 50px;
+    color: #ccc;
+    font-size: 14px;
+    background-color: rgba(0, 0, 0, 0.74);
+    line-height: 5px;
+    
+}
+
+a{
+    color: rgb(248, 248, 248);
+    text-decoration: none;
+}
+
+
+a.link {
+    color: #4dfb02;}
+
+h4{
+    font-family: 'Platypi';
+}
+
+/* Modal Styles */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1; 
+    padding-top: 100px; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4); 
+}
+
+.modal-content {
+    /* background-color: rgb(15, 150, 42); */
+    background-image: linear-gradient(rgb(62, 206, 0),rgb(13, 111, 38));
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #023617;
+    border-radius: 20px;
+    width: 80%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.close-button {
+    color: #4dfb02;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: rgb(255, 255, 255);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Responsive media queries */
+@media screen and (min-width: 769px) {
+    /* For large screens: Horizontal layout */
+    .data-container {
+        flex-direction: row;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    /* For small screens: Vertical layout */
+    .data-container {
+
+        flex-direction: column;
+        align-items: center;
+        width: 500px;
+        zoom: 0.5;
+    }
+
+    .title{
+        font-size: 20px;
+        zoom: 0.5;
+    }
+
+    #date, #greeting {
+        font-size: 10px;
+    }
+
+    #profile-button, #logout-button {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .circle {
+        width: 120px;
+        height: 120px;
+    }
+
+    .value {
+        font-size: 14px;
+    }
+
+    .label {
+        font-size: 14px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    /* Further adjustments for very small screens */
+    .title h1 {
+        font-size: 18px;
+    }
+
+    #profile-button, #logout-button {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .data-container {
+        flex-direction: column;
+        width: 200px;
+        zoom: 0.5;
+        margin: 2px;
+    }
+
+    .data:hover {
+        transform: scale(1.2);
+    }
+
+    .value {
+        font-size: 12px;
+    }
+
+    .label {
+        font-size: 12px;
+    }
+
+    footer {
+        font-size: 10px;
+    }
+}

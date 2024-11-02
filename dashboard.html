@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Greenhouse Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js';
+        import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js';
+    
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY_HERE",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+    
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+        const db = getFirestore(app);
+    
+        // Function to update UI elements with data from Firebase
+        function updateData(snapshot, elementId) {
+            const value = snapshot.val();
+            const circle = document.getElementById(elementId);
+            const circleFill = circle.querySelector('.circle-fill');
+            const valueText = circle.querySelector('.value');
+    
+            if (elementId === 'temperature') {
+                // Show the value in °C for temperature
+                valueText.textContent = `${value}°C`;
+                circleFill.style.strokeDasharray = `${value} 100`; // Adjust or remove if unnecessary
+            } else {
+                // Show the value as a percentage for other data types
+                const percentage = Math.round(value);
+                valueText.textContent = `${percentage}%`;
+                circleFill.style.strokeDasharray = `${percentage} 100`;
+            }
+        }
+    
+        // References for sensor data in the database
+        const refs = {
+            temperature: ref(database, '/greenhouse/temperature'),
+            humidity: ref(database, '/greenhouse/humidity'),
+            soilMoisture: ref(database, '/greenhouse/soilMoisture'),
+            light: ref(database, '/greenhouse/light'),
+            co2: ref(database, '/greenhouse/co2')
+        };
+    
+        // Attach listeners to update the UI for each sensor
+        for (const [key, firebaseRef] of Object.entries(refs)) {
+            onValue(firebaseRef, (snapshot) => updateData(snapshot, key));
+        }
+    
+        // Fetch user data from Firestore
+        async function fetchUserData(uid) {
+            try {
+                const userDocRef = doc(db, 'users', uid);
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    return userDocSnap.data();
+                } else {
+                    console.log("No such user document!");
+                    return null;
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+                return null;
+            }
+        }
+    
+        // Event listener for page load
+        document.addEventListener('DOMContentLoaded', async function () {
+            const dateElement = document.getElementById('date');
+            const greetingElement = document.getElementById('greeting');
+            const profileButton = document.getElementById('profile-button');
+    
+            const date = new Date();
+            const hours = date.getHours();
+            let greeting;
+    
+            if (hours < 12) {
+                greeting = 'Good Morning';
+            } else if (hours < 18) {
+                greeting = 'Good Afternoon';
+            } else {
+                greeting = 'Good Evening';
+            }
+    
+            // Check if a user is logged in
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    const userData = await fetchUserData(user.uid);
+                    if (userData && userData.firstName) {
+                        greetingElement.textContent = `Hi! ${userData.firstName}, ${greeting}`;
+                    } else {
+                        greetingElement.textContent = greeting;
+                    }
+                    dateElement.textContent = date.toDateString();
+                } else {
+                    window.location.href = 'index.html'; // Redirect to login page if not logged in
+                }
+            });
+    
+            // Show profile modal on button click
+            profileButton.addEventListener('click', async () => {
+                const user = auth.currentUser;
+                if (user) {
+                    const userData = await fetchUserData(user.uid);
+                    if (userData) {
+                        document.getElementById('user-name').textContent = `Name: ${userData.firstName || 'Unknown'}`;
+                        document.getElementById('user-email').textContent = `Email: ${user.email}`;
+                        document.getElementById('profile-modal').style.display = 'block';
+                    } else {
+                        alert('Error fetching user profile.');
+                    }
+                } else {
+                    alert("No user signed in");
+                }
+            });
+    
+            // Close modal on click
+            document.querySelector('.close-button').addEventListener('click', () => {
+                document.getElementById('profile-modal').style.display = 'none';
+            });
+    
+            window.addEventListener('click', (event) => {
+                const modal = document.getElementById('profile-modal');
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            });
+    
+            // Logout functionality
+            document.getElementById('logout-button').addEventListener('click', () => {
+                signOut(auth).then(() => {
+                    window.location.href = 'index.html'; // Redirect to login page
+                }).catch((error) => {
+                    alert('Error during logout: ' + error.message);
+                });
+            });
+        });
+    </script>
+    
+</head>
+<body>
+    <div class="title">
+        <h1>Smart Greenhouse Dashboard</h1>
+        <div class="p-l-buttons">
+            <button id="profile-button">Profile</button>
+            <button id="logout-button" class="p-l-buttons">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="css-selector">
+            <div id="date">Welcome</div>
+            <div id="greeting" class="greeting"></div>
+
+            <div class="data-container">
+                <div id="temperature" class="data" style="--color: #007aff;">
+                    <svg class="circle" viewBox="0 0 36 36">
+                        <path class="circle-bg" d="M18 2.0845a 15.9155 15.9155 0 1 1 0 31.831a 15.9155 15.9155 0 1 1 0 -31.831" />
+                        <path class="circle-fill" d="M18 2.0845a 15.9155 15.9155 0 1 1 0 31.831a 15.9155 15.9155 0 1 1 0 -31.831" />
+                    </svg>
+                    <div class="value">--%</div>
+                    <div class="label">Temperature</div>
+                </div>
+                <div id="humidity" class="data" style="--color: #34c759;">
+                    <svg class="circle" viewBox="0 0 36 36">
+                        <path class="circle-bg" d="M18 2.0845a 15.9155 15.9155 0 1 1 0 31.831a 15.9155 15.9155 0 1 1 0 -31.831" />
+                        <path class="circle-fill" d="M18 2.0845a 15.9155 15.9155 0 1 1 0 31.831a 15.9155 15.9155 0 1 1 0 -31.831" />
+                    </svg>
+                    <div class="value">--%</div>
+                    <div class="label">Humidity</div>
+                </div>
+                <div id="soilMoisture" class="data" style="--color: #ff4562;">
+                    <svg class="circle" viewBox="0 0 36 36">
+                        <path class="circle-bg" d="M18 2.0845a 15.9155 15.9155 0 1 1 0 31.831a 15.9155 15.9155 0 1 1 0 -31.831" />
+                        <path class="circle-fill" d="M18 2.0845a 15.9155 15.9155 0 1 1 0 31.831a 15.9155 15.9155 0 1 1 0 -31.831" />
+                    </svg>
+                    <div class="value">--%</div>
+                    <div class="label">Soil Moisture</div>
+                </div>
+                <div id="light" class="data" style="--color: #ffcc00;">
+                    <svg class="circle" viewBox="0 0 36 36">
+                        <path class="circle-bg" d="M18 2.0845a 15.9155 15.9155 0 1 1 0 31.831a 15.9155 15.9155 0 1 1 0 -31.831" />
+                        <path class="circle-fill" d="M18 2.0845a 15.9155 15.9155 0 1 1 0 31.831a 15.9155 15.9155 0 1 1 0 -31.831" />
+                    </svg>
+                    <div class="value">--%</div>
+                    <div class="label">Light</div>
+                </div>
+                <div id="co2" class="data" style="--color: #ff9500;">
+                    <svg class="circle" viewBox="0 0 36 36">
+                        <path class="circle-bg" d="M18 2.0845a 15.9155 15.9155 0 1 1 0 31.831a 15.9155 15.9155 0 1 1 0 -31.831" />
+                        <path class="circle-fill" d="M18 2.0845a 15.9155 15.9155 0 1 1 0 31.831a 15.9155 15.9155 0 1 1 0 -31.831" />
+                    </svg>
+                    <div class="value">--%</div>
+                    <div class="label">CO2</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <p>&#169; All rights reserved Dasitha Dinith Dilshan Dissanayaka</p>
+            <h7><a href="xx.html">CONTACT: support.greenhouse.lk</a></h7>
+        </footer>
+    </div>
+
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>User Profile</h2>
+            <p id="user-name"></p>
+            <p id="user-email"></p>
+        </div>
+    </div>
+</body>
+</html>
